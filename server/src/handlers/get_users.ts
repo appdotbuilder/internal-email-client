@@ -1,13 +1,26 @@
 
+import { db } from '../db';
+import { usersTable } from '../db/schema';
 import { type PublicUser } from '../schema';
+import { asc } from 'drizzle-orm';
 
 export const getUsers = async (): Promise<PublicUser[]> => {
-  // This is a placeholder declaration! Real code should be implemented here.
-  // The goal of this handler is to fetch all users for recipient selection
-  // in the compose interface. Returns public user info only.
-  // Steps:
-  // 1. Query all users from database
-  // 2. Return only public fields (exclude password_hash)
-  // 3. Order by name for better UX
-  return Promise.resolve([]);
+  try {
+    // Query all users from database, ordered by name for better UX
+    const users = await db.select({
+      id: usersTable.id,
+      email: usersTable.email,
+      first_name: usersTable.first_name,
+      last_name: usersTable.last_name,
+      created_at: usersTable.created_at
+    })
+    .from(usersTable)
+    .orderBy(asc(usersTable.first_name), asc(usersTable.last_name))
+    .execute();
+
+    return users;
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+    throw error;
+  }
 };
